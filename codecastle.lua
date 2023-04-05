@@ -7,6 +7,14 @@
 -- script:  lua
 G={}I=1p=print
 
+function cclevel(leveln)
+  for x=0, 29, 1 do
+    for y=0, 16, 1 do
+      mset(x, y, 0)
+    end
+  end
+end
+
 function applypalette(pal, paln)
   for i = 1, #(pal[paln]), 1 do
     poke(0x3fbf+i, pal[paln][i])
@@ -21,7 +29,7 @@ end
 
 function ccdraw()
   G[1].SF[ G[1].S ]() --Execute tick function of current state
-  print("CODECASTLE 4053a Prototype", 0, 130)
+  print("CODECASTLE 4059a Prototype", 0, 130)
 end
 
 function ccexit()
@@ -31,17 +39,24 @@ function ccexit()
 end
 
 function ccupdate()
-  if (btnp(4)) then ccexit() end
+  if (btnp(7)) then ccexit() end
+  G[1].TC = G[1].TC + 1
 end
 
 function cctitle()
   cls(0)
   applypalette(G[1].PAL, 1)
-  spr(2, 0, 0, 0, 2, 0, 0, 6, 1)
+  spr(2, 72, 32, 0, 2, 0, 0, 6, 1)
+  print("Press A to start", 75, 72, (G[1].TC/5)%16+1)
+  if (btnp(4)) then
+    applypalette(G[1].PAL, 2)
+    cclevel(0)
+    G[1].S = "game"
+  end
 end
 
 function ccgame()
-  
+  map()
 end
 
 G[1] = {
@@ -51,7 +66,9 @@ G[1] = {
    I = ccinit,
    PAL = {
           {0x00, 0x00, 0x00, 0xce, 0x79, 0x14,
-          0x30, 0x34, 0x95, 0xf0, 0xf0, 0xf0}
+          0x30, 0x34, 0x95, 0xf0, 0xf0, 0xf0},
+          {0x00, 0x00, 0x00, 0x80, 0x80, 0x80,
+          0xff, 0xcf, 0x00, 0xf0, 0xf0, 0xf0},
         },
   OPAL = {{0x14, 0x0c, 0x1c, 0x44, 0x24, 0x34, --To make sure the main menu gets displayed correctly
           0x30, 0x34, 0x6d, 0x4e, 0x4a, 0x4e}},
@@ -61,8 +78,10 @@ G[1] = {
    SF = {
       title = cctitle,
       game = ccgame
-     }
+     },
+   TC = 0
 }
+
 G[2] = {
    N = "Game Title",
    A = "Game Author",
